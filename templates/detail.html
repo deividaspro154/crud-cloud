@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <div>
+        <h1>{{ product.name }}</h1>
+        <p class="muted">{{ product.sku }}</p>
+    </div>
+    <div class="actions">
+        <a class="button secondary" href="{{ url_for('edit_product', product_id=product.id) }}">Edit</a>
+        <form action="{{ url_for('delete_product', product_id=product.id) }}" method="post" onsubmit="return confirm('Delete this product?')">
+            <button class="button danger" type="submit">Delete</button>
+        </form>
+    </div>
+</div>
+
+<div class="detail-grid">
+    <section class="card">
+        {% if product.image_url %}
+            <img class="product-image" src="{{ product.image_url }}" alt="{{ product.name }}">
+        {% else %}
+            <div class="image-placeholder">No image</div>
+        {% endif %}
+    </section>
+
+    <section class="card">
+        <dl>
+            <dt>Price</dt><dd>€{{ "%.2f"|format(product.price) }}</dd>
+            <dt>Quantity</dt><dd>{{ product.quantity }}</dd>
+            <dt>Available</dt><dd>{{ "Yes" if product.available else "No" }}</dd>
+            <dt>Restock date</dt><dd>{{ product.restock_date or "—" }}</dd>
+            <dt>Storage</dt><dd>{{ product.storage_provider or "—" }}</dd>
+            <dt>Created</dt><dd>{{ product.created_at.strftime("%Y-%m-%d %H:%M:%S") }} UTC</dd>
+            <dt>Updated</dt><dd>{{ product.updated_at.strftime("%Y-%m-%d %H:%M:%S") }} UTC</dd>
+        </dl>
+
+        <h3>Description</h3>
+        <p>{{ product.description or "No description." }}</p>
+    </section>
+</div>
+{% endblock %}

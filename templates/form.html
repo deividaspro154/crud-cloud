@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% set editing = product is not none %}
+{% block title %}{{ "Edit" if editing else "Create" }} product{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <div>
+        <h1>{{ "Edit product" if editing else "Create product" }}</h1>
+        <p class="muted">Validation covers string, integer, decimal number, boolean and date values.</p>
+    </div>
+</div>
+
+<form class="card form-grid" method="post" enctype="multipart/form-data">
+    <label>
+        Name <span>*</span>
+        <input name="name" minlength="2" maxlength="80" required
+               value="{{ form_data.get('name', '') if form_data else (product.name if product else '') }}">
+    </label>
+
+    <label>
+        SKU <span>*</span>
+        <input name="sku" minlength="2" maxlength="30" required
+               value="{{ form_data.get('sku', '') if form_data else (product.sku if product else '') }}">
+    </label>
+
+    <label>
+        Quantity <span>*</span>
+        <input name="quantity" type="number" min="0" step="1" required
+               value="{{ form_data.get('quantity', '') if form_data else (product.quantity if product else 0) }}">
+    </label>
+
+    <label>
+        Price (€) <span>*</span>
+        <input name="price" type="number" min="0" step="0.01" required
+               value="{{ form_data.get('price', '') if form_data else ('%.2f'|format(product.price) if product else '0.00') }}">
+    </label>
+
+    <label>
+        Restock date
+        <input name="restock_date" type="date"
+               value="{{ form_data.get('restock_date', '') if form_data else (product.restock_date.isoformat() if product and product.restock_date else '') }}">
+    </label>
+
+    <label>
+        Product image
+        <input name="image" type="file" accept=".png,.jpg,.jpeg,.gif,.webp,image/*">
+        <small>Max 5 MB. Cloudinary is used when CLOUDINARY_URL is configured.</small>
+    </label>
+
+    <label class="checkbox-row">
+        <input name="available" type="checkbox"
+               {% if form_data %}{% if form_data.get('available') %}checked{% endif %}
+               {% elif not product or product.available %}checked{% endif %}>
+        Available
+    </label>
+
+    <label class="full">
+        Description
+        <textarea name="description" rows="5">{{ form_data.get('description', '') if form_data else (product.description if product and product.description else '') }}</textarea>
+    </label>
+
+    {% if editing and product.image_url %}
+    <div class="full current-image">
+        <span class="muted">Current image:</span>
+        <img src="{{ product.image_url }}" alt="{{ product.name }}">
+    </div>
+    {% endif %}
+
+    <div class="full form-actions">
+        <button class="button" type="submit">{{ "Save changes" if editing else "Create product" }}</button>
+        <a class="button secondary" href="{{ url_for('index') }}">Cancel</a>
+    </div>
+</form>
+{% endblock %}

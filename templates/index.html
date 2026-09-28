@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Products{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <div>
+        <h1>Products</h1>
+        <p class="muted">CRUD web application with database, API, file storage and a background operation.</p>
+    </div>
+    <a class="button" href="{{ url_for('create_product') }}">+ Add product</a>
+</div>
+
+{% if products %}
+<div class="table-wrap">
+<table>
+    <thead>
+    <tr>
+        <th>Image</th>
+        <th>Name</th>
+        <th>SKU</th>
+        <th>Price</th>
+        <th>Qty</th>
+        <th>Available</th>
+        <th>Restock date</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for product in products %}
+    <tr>
+        <td>
+            {% if product.image_url %}
+                <img class="thumb" src="{{ product.image_url }}" alt="{{ product.name }}">
+            {% else %}
+                <span class="muted">—</span>
+            {% endif %}
+        </td>
+        <td><a href="{{ url_for('product_detail', product_id=product.id) }}">{{ product.name }}</a></td>
+        <td>{{ product.sku }}</td>
+        <td>€{{ "%.2f"|format(product.price) }}</td>
+        <td>{{ product.quantity }}</td>
+        <td>
+            {% if product.available %}
+                <span class="badge yes">Yes</span>
+            {% else %}
+                <span class="badge no">No</span>
+            {% endif %}
+        </td>
+        <td>{{ product.restock_date or "—" }}</td>
+        <td class="actions">
+            <a class="button secondary small" href="{{ url_for('edit_product', product_id=product.id) }}">Edit</a>
+            <form action="{{ url_for('delete_product', product_id=product.id) }}" method="post" onsubmit="return confirm('Delete this product?')">
+                <button class="button danger small" type="submit">Delete</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<div class="empty">
+    <p>No products yet.</p>
+    <a class="button" href="{{ url_for('create_product') }}">Create the first product</a>
+</div>
+{% endif %}
+
+<section class="panel">
+    <div class="page-heading compact">
+        <div>
+            <h2>Background operation</h2>
+            <p class="muted">Every 60 seconds, products with quantity = 0 are automatically marked unavailable.</p>
+        </div>
+        <form action="{{ url_for('run_background_now') }}" method="post">
+            <button class="button secondary" type="submit">Run now</button>
+        </form>
+    </div>
+
+    {% if events %}
+    <table>
+        <thead>
+        <tr><th>Run time (UTC)</th><th>Changed</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+        {% for event in events %}
+        <tr>
+            <td>{{ event.ran_at.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+            <td>{{ event.changed_count }}</td>
+            <td>{{ event.message }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="muted">No background runs recorded yet.</p>
+    {% endif %}
+</section>
+{% endblock %}
